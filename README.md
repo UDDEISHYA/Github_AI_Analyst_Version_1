@@ -1,4 +1,4 @@
-# AI Analyst
+# AI Analyst - V1
 
 # AI Analyst — Ask Your Data a Question, Get a Real Answer
 
