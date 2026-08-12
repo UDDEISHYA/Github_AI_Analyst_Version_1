@@ -1,0 +1,51 @@
+# HOME: Verified examples (Home 5) — the communal store's verified-examples home.
+# NovaMart semantic layer: VERIFIED QUERIES (blessed question -> SQL exemplars).
+# When a question pattern has a known-good query, save it here as a few-shot exemplar the agent retrieves.
+# Stores the SQL PATTERN only, never the result number (the analyst recomputes). Each is human-verified and
+# re-runnable.
+#
+# THE LEAKAGE RULE: a verified query steers the analyst at runtime; the eval suite grades it. The same
+# question must never sit in both, or the store is handing the analyst the answer key and any score
+# improvement is fake. Every entry here is window-scoped to a question the suite does not grade; it
+# teaches the pattern, never the answer. (Two earlier entries answered graded questions verbatim;
+# fixed 2026-07-08.)
+#
+# Grounded: each SQL was run on BOOTCAMP_DB.NOVAMART on Snowflake 2026-07-08.
+schema_version: 1
+dataset: novamart
+
+verified_queries:
+  - name: completed_revenue_q1_2024
+    question: "What was our completed revenue in Q1 2024?"
+    metric: total_revenue
+    sql: |
+      SELECT SUM(total_amount)
+      FROM orders
+      WHERE status = 'completed'
+        AND order_date >= '2024-01-01' AND order_date < '2024-04-01'
+    note: "Completed orders only (excludes cancelled/returned). Half-open date window. Do NOT join
+           order_items to sum order totals (fans out). Window-scoped on purpose: the all-time version
+           is a graded eval question, and a verified query never answers a graded question. Verified
+           on Snowflake."
+    verified_by: shane
+    verified_at: 2026-07-08
+    last_verified: 2026-07-08
+
+  - name: checkout_conversion_q1_2024
+    question: "What was our checkout conversion rate in Q1 2024?"
+    metric: checkout_conversion
+    sql: |
+      WITH checkout AS (SELECT DISTINCT session_id FROM events WHERE event_type = 'checkout_started'
+                          AND event_date >= '2024-01-01' AND event_date < '2024-04-01'),
+           purchase AS (SELECT DISTINCT session_id FROM events WHERE event_type = 'purchase_complete'
+                          AND event_date >= '2024-01-01' AND event_date < '2024-04-01')
+      SELECT COUNT(*) * 1.0 / (SELECT COUNT(*) FROM checkout)
+      FROM checkout c
+      WHERE c.session_id IN (SELECT session_id FROM purchase)
+    note: "Session grain, event-based, half-open date window on both sides. Do NOT use
+           sessions.had_purchase (unreliable Q4 2024). Numerator = checkout sessions that also have a
+           purchase_complete event. Window-scoped on purpose: the all-time version is a graded eval
+           question. Verified on Snowflake."
+    verified_by: shane
+    verified_at: 2026-07-08
+    last_verified: 2026-07-08

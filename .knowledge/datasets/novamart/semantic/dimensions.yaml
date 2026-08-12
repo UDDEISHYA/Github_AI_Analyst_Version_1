@@ -1,0 +1,122 @@
+# HOME: Semantic layer (Home 4) — the communal store's executable semantic-layer home.
+# NovaMart semantic layer: DIMENSIONS.
+# Categorical attributes for grouping/filtering, each with synonyms (map a question's words to the column)
+# and sample_values (the REAL values, so the agent never invents a filter literal).
+# sample_values were PROFILED from BOOTCAMP_DB.NOVAMART on Snowflake 2026-06-25 - profiling matters:
+# device is web/ios/android (NOT desktop/mobile/tablet), channel is organic/tiktok_ads/paid_search/...
+schema_version: 1
+dataset: novamart
+
+dimensions:
+  - dimension: acquisition_channel
+    entity: user
+    expr: users.acquisition_channel
+    data_type: varchar
+    synonyms: ["channel", "acquisition source", "marketing channel", "where the user came from"]
+    sample_values: ["organic", "tiktok_ads", "paid_search", "social", "email", "referral"]
+    description: "Channel a user was acquired through, set at signup."
+
+  - dimension: country
+    entity: user
+    expr: users.country
+    data_type: varchar
+    synonyms: ["geo", "market", "region"]
+    sample_values: ["US", "UK", "CA", "DE", "AU", "other"]
+
+  - dimension: age_bucket
+    entity: user
+    expr: users.age_bucket
+    data_type: varchar
+    synonyms: ["age group", "age range"]
+    sample_values: ["18-24", "25-34", "35-44", "45-54", "55+"]
+
+  - dimension: device
+    entity: session
+    expr: sessions.device
+    data_type: varchar
+    synonyms: ["platform", "device type"]
+    sample_values: ["web", "ios", "android"]
+    description: "Session device. Real values are web / ios / android (NOT desktop/mobile/tablet).
+                  Cross-check: events.app_version IS NULL ~ web; 2.4.0 / 3.2.0 are mobile app versions."
+
+  - dimension: order_status
+    entity: order
+    expr: orders.status
+    data_type: varchar
+    synonyms: ["status", "state", "fulfillment status"]
+    sample_values: ["completed", "cancelled", "returned"]
+    description: "Order lifecycle state. Filter to 'completed' for revenue; keep all for funnel conversion."
+
+  - dimension: is_plus_member_order
+    entity: order
+    expr: orders.is_plus_member_order
+    data_type: boolean
+    synonyms: ["plus order", "membership order", "plus member order"]
+    sample_values: [true, false]
+    description: "Whether the order was placed by a Plus member. Skewed ~1,622 true / ~45,577 false."
+
+  - dimension: product_category
+    entity: product
+    expr: products.category
+    data_type: varchar
+    synonyms: ["category", "department"]
+    sample_values: ["clothing", "electronics", "home", "beauty", "sports", "books"]
+
+  - dimension: plan_type
+    entity: membership
+    expr: memberships.plan_type
+    data_type: varchar
+    synonyms: ["membership plan", "plan", "subscription tier"]
+    sample_values: ["plus_trial", "plus_monthly", "plus_annual"]
+
+  - dimension: membership_status
+    entity: membership
+    expr: memberships.status
+    data_type: varchar
+    synonyms: ["membership state"]
+    sample_values: ["expired", "converted", "active", "cancelled"]
+    description: "Membership state. is_current is a separate boolean for the currently-active set."
+
+  - dimension: event_type
+    entity: event
+    expr: events.event_type
+    data_type: varchar
+    synonyms: ["funnel step", "interaction type", "action"]
+    sample_values: ["page_view", "product_view", "login", "add_to_cart", "app_open", "search",
+                    "checkout_started", "payment_attempted", "purchase_complete", "save_for_later"]
+    description: "Funnel/interaction event. Funnel order: page_view -> product_view -> add_to_cart ->
+                  checkout_started -> payment_attempted -> purchase_complete."
+
+  # Order money columns (numeric, on the orders table). Not grouping dimensions - they are the raw amount
+  # columns a revenue measure is built on, surfaced here so a meaning contract can be drafted against the
+  # REAL column names. Identity holds on every order (verified on BOOTCAMP_DB.NOVAMART.ORDERS):
+  #   total_amount = subtotal - discount_amount + shipping_amount   (exact)
+  - dimension: subtotal
+    entity: order
+    expr: orders.subtotal
+    data_type: numeric
+    synonyms: ["pre-discount total", "merchandise value", "line total before discount"]
+    description: "Pre-discount merchandise value of an order, before any discount or shipping. This is the
+                  gross basis: it EXCLUDES both the discount and shipping."
+
+  - dimension: discount_amount
+    entity: order
+    expr: orders.discount_amount
+    data_type: numeric
+    synonyms: ["discount", "promo amount", "amount discounted"]
+    description: "Discount applied to the order. Subtracted from subtotal when computing total_amount."
+
+  - dimension: shipping_amount
+    entity: order
+    expr: orders.shipping_amount
+    data_type: numeric
+    synonyms: ["shipping", "shipping cost", "delivery charge"]
+    description: "Shipping charged on the order. Added to (subtotal - discount_amount) for total_amount."
+
+  - dimension: total_amount
+    entity: order
+    expr: orders.total_amount
+    data_type: numeric
+    synonyms: ["order total", "amount charged", "what the customer paid"]
+    description: "What the customer was charged: total_amount = subtotal - discount_amount + shipping_amount.
+                  NET of the discount and INCLUSIVE of shipping, so it is not a pre-discount / gross figure."

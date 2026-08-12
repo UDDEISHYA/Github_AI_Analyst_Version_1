@@ -1,0 +1,9 @@
+# Day 3 (Cohort 4). Context is LOCAL: it lives in this repo, in
+# .knowledge/datasets/novamart/. You own it and you will edit it today.
+#
+# It ships WITHOUT a definition for `retention`. That is deliberate.
+# Do not switch this to `git` today -- the shared team repo already has retention
+# defined, and you would skip the exercise.
+
+source: local
+dataset_path: .knowledge/datasets/novamart

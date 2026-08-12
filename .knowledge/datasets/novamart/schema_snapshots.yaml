@@ -1,0 +1,28 @@
+# HOME: schema/catalog guard. The schema+catalog HOME itself (Home 9) is ANALYST-SIDE LOCAL (.knowledge),
+# not the communal store. This file is only the semantic layer's freshness guard: column-shape checksums the
+# schema-diff guard re-checks at load. It supports the semantic layer; it is not the schema home.
+# Schema snapshots: known-good column-shape checksums per table-backed definition.
+# The schema-diff guard (ai-analyst-plus helpers/schema_guard.py) re-reads the live schema at load
+# and quarantines any definition whose table changed shape (a renamed or dropped column).
+#
+# PROVENANCE: bootstrapped 2026-06-26 from a DuckDB mirror of the documented NovaMart semantic-layer
+# schema, because the live BOOTCAMP_DB.NOVAMART warehouse was not reachable this session. DuckDB and
+# Snowflake spell column TYPES differently, so RE-BIND these against the live warehouse before
+# relying on them in production:
+#     from helpers.schema_guard import snapshot_schema
+#     snapshot_schema(live_conn, 'datasets/novamart')   # rewrites this file from the live schema
+# Machine-written, not hand-edited. Keyed by table.
+tables:
+  BOOTCAMP_DB.NOVAMART.CALENDAR: 0c7ff70abe36a55d
+  BOOTCAMP_DB.NOVAMART.EVENTS: baaa634438a6e53c
+  BOOTCAMP_DB.NOVAMART.EXPERIMENTS: e9c8d01a0d2a0102
+  BOOTCAMP_DB.NOVAMART.EXPERIMENT_ASSIGNMENTS: ff95a21d89aee13e
+  BOOTCAMP_DB.NOVAMART.MEMBERSHIPS: dd11a046f24361e7
+  BOOTCAMP_DB.NOVAMART.NPS_RESPONSES: 282f2e207c9e503b
+  BOOTCAMP_DB.NOVAMART.ORDERS: 153c9823b0c3b9f8
+  BOOTCAMP_DB.NOVAMART.ORDER_ITEMS: d12eaef467236e58
+  BOOTCAMP_DB.NOVAMART.PRODUCTS: 6bd532af5099280b
+  BOOTCAMP_DB.NOVAMART.PROMOTIONS: 90869be729b3b8d9
+  BOOTCAMP_DB.NOVAMART.SESSIONS: d5ac7d74f27117e3
+  BOOTCAMP_DB.NOVAMART.SUPPORT_TICKETS: 37f1381c6523642e
+  BOOTCAMP_DB.NOVAMART.USERS: 2e1adb29a98b1a1e

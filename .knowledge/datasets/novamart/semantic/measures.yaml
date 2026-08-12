@@ -1,0 +1,64 @@
+# HOME: Semantic layer (Home 4) — the communal store's executable semantic-layer home.
+# NovaMart semantic layer: MEASURES.
+# Additive building blocks. expr names the column or event; NO full SQL and NO hardcoded result numbers -
+# the analyst computes the value at query time. Metrics (metrics/index.yaml) reference these measures so a
+# rule like "completed only" is defined once and reused.
+schema_version: 1
+dataset: novamart
+
+measures:
+  - measure: total_revenue
+    entity: order
+    description: "Total revenue from completed orders — sum of orders.total_amount, which is net of the discount and includes shipping."
+    aggregation: sum
+    expr: orders.total_amount
+    filter: "orders.status = 'completed'"
+    rejected:
+      - "sum over all statuses (includes cancelled/returned)"
+      - "sum total_amount across an orders-to-order_items join (fans out, inflates)"
+
+  - measure: gross_revenue
+    entity: order
+    description: "Pre-discount merchandise revenue from completed orders — sum of orders.subtotal, which excludes both the discount and shipping."
+    aggregation: sum
+    expr: orders.subtotal
+    filter: "orders.status = 'completed'"
+    rejected:
+      - "total_amount instead of subtotal (total_amount is net of discount and includes shipping)"
+      - "sum over all statuses (includes cancelled/returned)"
+      - "sum across an orders-to-order_items join (fans out, inflates)"
+
+  - measure: order_count
+    entity: order
+    description: "Distinct completed orders."
+    aggregation: count_distinct
+    expr: orders.order_id
+    filter: "orders.status = 'completed'"
+
+  - measure: purchasing_sessions
+    entity: session
+    description: "Sessions with a purchase_complete event."
+    aggregation: count_distinct
+    expr: sessions.session_id
+    filter: "session has an events row with event_type = 'purchase_complete'"
+    rejected: ["sessions.had_purchase = true (unreliable for Q4 2024)"]
+
+  - measure: checkout_sessions
+    entity: session
+    description: "Sessions with a checkout_started event."
+    aggregation: count_distinct
+    expr: sessions.session_id
+    filter: "session has an events row with event_type = 'checkout_started'"
+
+  - measure: active_memberships
+    entity: membership
+    description: "Currently-active memberships."
+    aggregation: count
+    expr: memberships.membership_id
+    filter: "memberships.is_current = true"
+
+  - measure: total_memberships
+    entity: membership
+    description: "All membership records."
+    aggregation: count
+    expr: memberships.membership_id

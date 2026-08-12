@@ -1,0 +1,115 @@
+# HOME: Semantic layer (Home 4) — the communal store's executable semantic-layer home.
+# NovaMart semantic layer: RELATIONSHIPS (joins).
+#
+# Each join's column pair and cardinality, so the agent stops guessing grain on multi-table questions.
+# Verified against BOOTCAMP_DB.NOVAMART on Snowflake 2026-06-25: the right-side key of every join below is
+# unique and the join produces 0 orphan rows, so all are clean many-to-one. The nine analytics-critical
+# joins were orphan-checked directly; the remaining user_id / order_id joins reference the same
+# verified-unique keys (users.user_id, orders.order_id).
+schema_version: 1
+dataset: novamart
+
+relationships:
+  - name: sessions_to_users
+    left: session
+    right: user
+    columns: [{left: user_id, right: user_id}]
+    cardinality: many_to_one
+    verified: snowflake-2026-06-25
+
+  - name: events_to_sessions
+    left: event
+    right: session
+    columns: [{left: session_id, right: session_id}]
+    cardinality: many_to_one
+    verified: snowflake-2026-06-25
+
+  - name: events_to_products
+    left: event
+    right: product
+    columns: [{left: product_id, right: product_id}]
+    cardinality: many_to_one
+    nullable: true
+    verified: snowflake-2026-06-25
+
+  - name: events_to_users
+    left: event
+    right: user
+    columns: [{left: user_id, right: user_id}]
+    cardinality: many_to_one
+
+  - name: orders_to_users
+    left: order
+    right: user
+    columns: [{left: user_id, right: user_id}]
+    cardinality: many_to_one
+    verified: snowflake-2026-06-25
+
+  - name: orders_to_sessions
+    left: order
+    right: session
+    columns: [{left: session_id, right: session_id}]
+    cardinality: many_to_one
+    verified: snowflake-2026-06-25
+
+  - name: orders_to_promotions
+    left: order
+    right: promotion
+    columns: [{left: promo_id, right: promo_id}]
+    cardinality: many_to_one
+    nullable: true
+    verified: snowflake-2026-06-25
+
+  - name: order_items_to_orders
+    left: order_item
+    right: order
+    columns: [{left: order_id, right: order_id}]
+    cardinality: many_to_one
+    verified: snowflake-2026-06-25
+    note: "Many line items per order. Summing an order-level column across this join fans out and inflates
+           the total; aggregate order-level measures at the order grain."
+
+  - name: order_items_to_products
+    left: order_item
+    right: product
+    columns: [{left: product_id, right: product_id}]
+    cardinality: many_to_one
+    verified: snowflake-2026-06-25
+
+  - name: memberships_to_users
+    left: membership
+    right: user
+    columns: [{left: user_id, right: user_id}]
+    cardinality: many_to_one
+    verified: snowflake-2026-06-25
+
+  - name: experiment_assignments_to_experiments
+    left: experiment_assignment
+    right: experiment
+    columns: [{left: experiment_id, right: experiment_id}]
+    cardinality: many_to_one
+
+  - name: experiment_assignments_to_users
+    left: experiment_assignment
+    right: user
+    columns: [{left: user_id, right: user_id}]
+    cardinality: many_to_one
+
+  - name: nps_responses_to_users
+    left: nps_response
+    right: user
+    columns: [{left: user_id, right: user_id}]
+    cardinality: many_to_one
+
+  - name: support_tickets_to_users
+    left: support_ticket
+    right: user
+    columns: [{left: user_id, right: user_id}]
+    cardinality: many_to_one
+
+  - name: support_tickets_to_orders
+    left: support_ticket
+    right: order
+    columns: [{left: order_id, right: order_id}]
+    cardinality: many_to_one
+    nullable: true

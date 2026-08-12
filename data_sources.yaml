@@ -1,0 +1,18 @@
+# data_sources.yaml -- Connection registry for registered data sources
+# Tracks HOW to connect. The dataset brain (WHAT it contains) lives in
+# .knowledge/datasets/{name}/, and the active dataset pointer is in
+# .knowledge/active.yaml. This registry is OPTIONAL: when empty, the system
+# discovers datasets by scanning .knowledge/datasets/. Run /connect-data to add one.
+
+sources: {}
+
+# Example — uncomment and edit, or just run /connect-data:
+# sources:
+#   my_warehouse:
+#     display_name: "My Warehouse"
+#     description: "What this dataset contains"
+#     connection_type: "duckdb"        # duckdb | postgres | bigquery | snowflake
+#     database: "data/my_data.duckdb"
+#     schema_prefix: "my_schema"
+#     data_dir: "data/"
+#     registered_at: "YYYY-MM-DD"

@@ -1,0 +1,36 @@
+dataset_id: novamart
+display_name: "NovaMart"
+description: "E-commerce platform with full product analytics: users, sessions, event funnel, orders, products, experiments"
+connection_type: snowflake
+database: BOOTCAMP_DB
+schema_prefix: NOVAMART
+connection:
+  account: $SNOWFLAKE_ACCOUNT
+  user: $SNOWFLAKE_USER
+  password: $SNOWFLAKE_PASSWORD
+  warehouse: $SNOWFLAKE_WAREHOUSE
+  database: $SNOWFLAKE_DATABASE
+  schema: NOVAMART
+  role: $SNOWFLAKE_ROLE
+local_data:
+  duckdb: data/practice/novamart_practice.duckdb
+  path: data/practice/
+date_range:
+  start: "2024-01-01"
+  end: "2025-01-01"
+registered_at: "2026-04-10"
+last_used: "2026-06-14"
+tables:
+  calendar: {rows: 366}
+  events: {rows: 6510093}
+  experiment_assignments: {rows: 20000}
+  experiments: {rows: 2}
+  memberships: {rows: 5513}
+  nps_responses: {rows: 8000}
+  order_items: {rows: 75447}
+  orders: {rows: 47199}
+  products: {rows: 500}
+  promotions: {rows: 5}
+  sessions: {rows: 1383467}
+  support_tickets: {rows: 21587}
+  users: {rows: 50000}

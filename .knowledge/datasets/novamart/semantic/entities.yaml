@@ -1,0 +1,144 @@
+# HOME: Semantic layer (Home 4) — the communal store's executable semantic-layer home (entities/relationships/dimensions/measures/filters).
+# NovaMart semantic layer: ENTITIES (logical tables).
+#
+# The authoritative source table for each business concept, its keys, what one row means (grain), and the
+# caveats that bite. This answers "which table is the source of truth" and "what is one row" BEFORE any SQL
+# is written - the entity-mapping step that, left implicit, is the biggest source of multi-table drift.
+#
+# Rule: this pins meaning and structure only. No SQL, no result numbers.
+# Verified against BOOTCAMP_DB.NOVAMART on Snowflake 2026-06-25 (primary keys unique; FK joins 0 orphans).
+schema_version: 1
+dataset: novamart
+
+entities:
+  - entity: user
+    logical_table: users
+    base_table: BOOTCAMP_DB.NOVAMART.USERS
+    primary_key: user_id
+    grain: one row per registered user
+    row_count: 50000
+
+  - entity: session
+    logical_table: sessions
+    base_table: BOOTCAMP_DB.NOVAMART.SESSIONS
+    primary_key: session_id
+    foreign_keys:
+      - {column: user_id, references: user}
+    grain: one row per browsing session
+    row_count: 1383467
+    caveats:
+      - "had_purchase is UNRELIABLE for Nov-Dec 2024: 1,089 sessions have a purchase_complete event AND a
+         completed order but had_purchase=false (concentrated around Black Friday). Derive purchase outcome
+         from events.event_type='purchase_complete' or by joining orders on session_id; never trust
+         had_purchase for Q4 2024."
+
+  - entity: event
+    logical_table: events
+    base_table: BOOTCAMP_DB.NOVAMART.EVENTS
+    primary_key: event_id
+    foreign_keys:
+      - {column: user_id, references: user}
+      - {column: session_id, references: session}
+      - {column: product_id, references: product, nullable: true}
+    grain: one row per user interaction event
+    row_count: 6510093
+    caveats:
+      - "event_type is the funnel-step indicator: page_view, product_view, add_to_cart, checkout_started,
+         payment_attempted, purchase_complete."
+      - "app_version IS NULL ~ web sessions; 2.4.0 / 3.2.0 are the mobile app versions."
+
+  - entity: order
+    logical_table: orders
+    base_table: BOOTCAMP_DB.NOVAMART.ORDERS
+    primary_key: order_id
+    foreign_keys:
+      - {column: user_id, references: user}
+      - {column: session_id, references: session}
+      - {column: promo_id, references: promotion, nullable: true}
+    grain: one row per order (ALL statuses, including cancelled and returned)
+    row_count: 47199
+    caveats:
+      - "status: completed 40,234 / cancelled 4,596 / returned 2,369. Filter status='completed' for REVENUE;
+         keep all statuses for funnel conversion. purchase_complete events match all 47,199 orders."
+
+  - entity: order_item
+    logical_table: order_items
+    base_table: BOOTCAMP_DB.NOVAMART.ORDER_ITEMS
+    primary_key: order_item_id
+    foreign_keys:
+      - {column: order_id, references: order}
+      - {column: product_id, references: product}
+    grain: one row per line item within an order
+    row_count: 75447
+    caveats:
+      - "Many line items per order. Summing an order-level column (e.g. orders.total_amount) across an
+         orders-to-order_items join FANS OUT and inflates the total (proven: 3.15M correct vs 5.9M fanned).
+         Aggregate order-level measures at the order grain."
+
+  - entity: product
+    logical_table: products
+    base_table: BOOTCAMP_DB.NOVAMART.PRODUCTS
+    primary_key: product_id
+    grain: one row per catalog product
+    row_count: 500
+
+  - entity: membership
+    logical_table: memberships
+    base_table: BOOTCAMP_DB.NOVAMART.MEMBERSHIPS
+    primary_key: membership_id
+    foreign_keys:
+      - {column: user_id, references: user}
+    grain: one row per NovaMart Plus membership record
+    row_count: 5513
+    caveats:
+      - "ended_at IS NULL means still active. Use is_current (or status) for the active set."
+
+  - entity: promotion
+    logical_table: promotions
+    base_table: BOOTCAMP_DB.NOVAMART.PROMOTIONS
+    primary_key: promo_id
+    grain: one row per promotional campaign
+    row_count: 5
+
+  - entity: experiment
+    logical_table: experiments
+    base_table: BOOTCAMP_DB.NOVAMART.EXPERIMENTS
+    primary_key: experiment_id
+    grain: one row per A/B test definition
+    row_count: 2
+
+  - entity: experiment_assignment
+    logical_table: experiment_assignments
+    base_table: BOOTCAMP_DB.NOVAMART.EXPERIMENT_ASSIGNMENTS
+    primary_key: assignment_id
+    foreign_keys:
+      - {column: experiment_id, references: experiment}
+      - {column: user_id, references: user}
+    grain: one row per user-to-variant assignment
+    row_count: 20000
+
+  - entity: nps_response
+    logical_table: nps_responses
+    base_table: BOOTCAMP_DB.NOVAMART.NPS_RESPONSES
+    primary_key: response_id
+    foreign_keys:
+      - {column: user_id, references: user}
+    grain: one row per NPS survey response (score 0-10)
+    row_count: 8000
+
+  - entity: support_ticket
+    logical_table: support_tickets
+    base_table: BOOTCAMP_DB.NOVAMART.SUPPORT_TICKETS
+    primary_key: ticket_id
+    foreign_keys:
+      - {column: user_id, references: user}
+      - {column: order_id, references: order, nullable: true}
+    grain: one row per support interaction
+    row_count: 21587
+
+  - entity: calendar
+    logical_table: calendar
+    base_table: BOOTCAMP_DB.NOVAMART.CALENDAR
+    primary_key: date
+    grain: one row per calendar date (date dimension for joins/filtering)
+    row_count: 366

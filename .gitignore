@@ -1,0 +1,107 @@
+# ── Environment and secrets ───────────────────────────────────────────────────
+.env
+.env.*
+*.key
+*.pem
+credentials.json
+client_secret*.json
+service_account*.json
+*.credential
+*.token
+
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+venv/
+.venv/
+env/
+
+# ── Node.js ──────────────────────────────────────────────────────────────────
+node_modules/
+package-lock.json
+yarn.lock
+.npm/
+
+# ── OS files ─────────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ── Editor / IDE ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+
+# ── Intermediate / generated files ───────────────────────────────────────────
+working/
+outputs/
+reports/
+*.log
+
+# ── Data files (user-generated) ──────────────────────────────────────────────
+data/uploads/
+data/web_analyst.duckdb
+
+# ── MCP / Claude config (user-specific) ──────────────────────────────────────
+.claude/mcp.json
+.claude/settings.local.json
+.mcp.json
+snowflake-mcp-config.yaml
+
+# ── Knowledge system (user-specific) ─────────────────────────────────────────
+.knowledge/active.yaml
+.knowledge/setup-state.yaml
+.knowledge/config.yaml
+.knowledge/user/
+.knowledge/analyses/*
+.knowledge/corrections/*
+.knowledge/learnings/*
+.knowledge/global/*
+.knowledge/reliability/
+.knowledge/codex-review/
+.knowledge/comparison/
+.knowledge/comparisons/
+.knowledge/.context-cache/
+
+# ── Archives ─────────────────────────────────────────────────────────────────
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ── Test coverage ────────────────────────────────────────────────────────────
+.coverage
+htmlcov/
+
+# ── Generated slides / decks ─────────────────────────────────────────────────
+**/*.marp.pdf
+**/slides_*.pdf
+**/slides_*.html
+docs/**/*.pdf
+
+# ── Skill improvement eval results ───────────────────────────────────────────
+scripts/skill-improve-results/

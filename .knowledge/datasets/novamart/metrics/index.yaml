@@ -1,0 +1,42 @@
+# HOME: Meaning contracts (Home 3) — the communal store's meaning-contract home.
+# NovaMart metric dictionary (loaded at session start by knowledge-bootstrap).
+# A metric is defined by its MEANING, never by a hardcoded result number.
+# The analyst computes the value from the data; the definition only pins what to count.
+metrics:
+  - metric: checkout_conversion
+    means: "share of checkout sessions that complete a purchase"
+    grain: session
+    numerator: sessions with a purchase_complete event
+    denominator: sessions with a checkout_started event
+    window: full data window
+    rejected: ["session -> purchase over all sessions", "cart -> checkout", "checkout -> payment step", "users grain instead of sessions"]
+    last_verified: 2026-06-25
+    verified_by: shane
+
+  - metric: total_revenue
+    means: "total revenue from completed orders"
+    grain: order
+    numerator: total_revenue           # measures.yaml — SUM(orders.total_amount), net of discount, includes shipping
+    denominator: null
+    window: full data window
+    rejected:
+      - "include cancelled/returned orders"
+      - "sum total_amount across an orders-to-order_items join (fans out: ~5.9M vs ~3.15M correct)"
+    last_verified: 2026-06-25
+    verified_by: shane
+
+  - metric: gross_revenue
+    means: "pre-discount merchandise value of completed orders"
+    grain: order
+    numerator: gross_revenue           # measures.yaml — SUM(orders.subtotal), pre-discount, excludes shipping
+    denominator: null
+    window: full data window
+    filters:
+      - "orders.status = 'completed'"
+    rejected:
+      - "total_amount basis — total_amount is net of the discount (subtotal − discount_amount) and includes shipping_amount; it is a settlement figure, not a gross merchandise figure"
+      - "any shipping-inclusive reading — shipping is a fulfillment charge, not merchandise revenue"
+      - "include cancelled/returned orders"
+      - "sum across an orders-to-order_items join (fans out, inflates)"
+    last_verified: 2026-07-07
+    verified_by: shane

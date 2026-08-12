@@ -1,0 +1,33 @@
+# HOME: Semantic layer (Home 4) — the communal store's executable semantic-layer home.
+# NovaMart semantic layer: NAMED FILTERS (segments).
+# Common conditions given a name so the agent reuses the blessed filter instead of re-deriving it (and
+# dropping it half the time). expr is the SQL condition; no result numbers.
+schema_version: 1
+dataset: novamart
+
+filters:
+  - name: completed_orders
+    entity: order
+    expr: "orders.status = 'completed'"
+    description: "Completed orders only. Use for revenue and any order metric that should exclude
+                  cancelled/returned (completed 40,234 of 47,199)."
+
+  - name: active_memberships
+    entity: membership
+    expr: "memberships.is_current = true"
+    description: "Currently-active memberships (is_current = true)."
+
+  - name: purchase_sessions
+    entity: session
+    expr: "session has an events row with event_type = 'purchase_complete'"
+    description: "Sessions that completed a purchase, event-based (never sessions.had_purchase)."
+
+  - name: web_sessions
+    entity: session
+    expr: "sessions.device = 'web'"
+    description: "Web sessions. Device values are web / ios / android."
+
+  - name: plus_member_orders
+    entity: order
+    expr: "orders.is_plus_member_order = true"
+    description: "Orders placed by Plus members (~1,622 of 47,199)."
