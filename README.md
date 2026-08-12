@@ -1,35 +1,65 @@
 # AI Analyst
 
-An AI-powered data analysis platform that turns natural language questions into SQL queries, charts, and full analytical reports. Upload a CSV or use the bundled NovaMart e-commerce demo dataset, then ask questions in plain English.
+# AI Analyst — Ask Your Data a Question, Get a Real Answer
+
+<div align="center">
+
+![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi)
+![DuckDB](https://img.shields.io/badge/DuckDB-Analytics%20Engine-FFC107?logo=duckdb)
+![Claude](https://img.shields.io/badge/Claude-Anthropic-blueviolet?logo=anthropic)
+![GPT](https://img.shields.io/badge/GPT--4o-OpenAI-412991?logo=openai)
+![Matplotlib](https://img.shields.io/badge/Matplotlib-Visualization-11557c)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen)
+![Agents](https://img.shields.io/badge/Agent%20Templates-43-informational)
+
+</div>
 
 ---
 
-## What It Does
-
-**Simple questions** ("How many users do we have?", "Revenue by category") get answered instantly — the LLM writes SQL, executes it against your data, and returns results with optional charts.
-
-**Complex questions** ("Why did conversion drop in Q3?", "Investigate root cause of revenue decline") trigger a multi-agent pipeline that runs through question framing, hypothesis generation, data exploration, analysis, validation, and storytelling — streaming real-time progress in the sidebar.
-
-### Key Features
-
-- **Upload any CSV** — drag-and-drop into the sidebar, auto-ingested into DuckDB
-- **Bundled demo dataset** — 13-table NovaMart e-commerce dataset (users, orders, products, sessions, events, experiments, NPS, etc.) ready to explore
-- **Natural language chat** — ask questions, get SQL + results + charts
-- **Multi-agent pipeline** — L3-L5 questions trigger a full analytical workflow with multiple AI agents
-- **Real-time pipeline progress** — SSE-powered sidebar shows each agent's status as it runs
-- **Auto data profiling** — column types, null rates, unique counts, min/max ranges, data quality grading
-- **SWD-style charts** — Storytelling with Data visualization style (highlight bars, action titles, clean design)
-- **Dual LLM support** — works with either Claude (Anthropic) or GPT (OpenAI)
+An AI-powered analysis platform that takes natural language questions and returns SQL, charts, and full analytical reports — not chat responses dressed up as insight.
 
 ---
 
-## Screenshots
+## Background
 
-The app uses an "Analyst Workspace" design — content cards, not chat bubbles. Clean, professional, no generic AI chrome.
+Most AI data tools follow the same pattern: you ask a question, the model writes a query, you get a table. That's a lookup, not analysis.
+
+This project draws a line between the two. Simple questions — "How many users signed up last quarter?" — get answered instantly. But the kind of question that actually matters in a business context — "Why did conversion drop in Q4?" — triggers something fundamentally different: a multi-agent pipeline that frames the problem, generates hypotheses, explores the data, validates findings, and constructs a narrative.
+
+> The goal isn't to chat with your data. It's to analyze it the way a real analyst would — systematically, with evidence, and with a clear story at the end.
+
+Upload any CSV or use the bundled NovaMart e-commerce dataset (13 tables, ~1M rows at full scale). Works with Claude (Anthropic) or GPT-4o (OpenAI).
+
+---
+
+## What Makes This Different
+
+The core differentiator is the **question complexity router**. Every question gets classified into one of five levels, and each level gets a different treatment.
+
+| Level | Type | Example | What Happens |
+|-------|------|---------|--------------|
+| L1 | Lookup | "How many users signed up in 2024?" | Direct SQL, immediate answer |
+| L2 | Comparison | "Revenue by product category" | SQL + auto-generated chart |
+| L3 | Analysis | "Why did conversion rates drop in Q4?" | 4-agent pipeline with validation |
+| L4 | Investigation | "Root cause of revenue decline — size the opportunity" | 8-agent pipeline with cross-verification |
+| L5 | Presentation | "Build a deck on checkout funnel optimization" | 15-agent pipeline producing a full report |
+
+L1 and L2 questions get handled in a single LLM call with tool use. L3 through L5 spin up a full analytical workflow — agents running sequentially, each one building on the last, with real-time progress streaming to the sidebar via SSE.
+
+That distinction matters. A lookup tool that pretends to do analysis is worse than one that knows it can't.
+
+---
+
+## The Interface
+
+The design follows an "Analyst Workspace" pattern — structured content cards, not chat bubbles. No generic AI chrome.
 
 | Welcome Screen | Data Profile | Chat Analysis |
 |---|---|---|
 | Upload CSV or select demo dataset | Auto-profiled schema with quality grades | Natural language Q&A with SQL + charts |
+
+Charts follow Storytelling with Data principles: highlight bars, action titles, clean design. The goal is output you could put in front of a stakeholder without redesigning it.
 
 ---
 
@@ -37,20 +67,19 @@ The app uses an "Analyst Workspace" design — content cards, not chat bubbles. 
 
 ### Prerequisites
 
-- **Python 3.10+**
-- **An LLM API key** — either [Anthropic](https://console.anthropic.com/) or [OpenAI](https://platform.openai.com/api-keys)
+| Requirement | Details |
+|-------------|---------|
+| Python | 3.10+ |
+| LLM API Key | [Anthropic](https://console.anthropic.com/) or [OpenAI](https://platform.openai.com/api-keys) |
 
-### 1. Clone the repo
+### Setup
 
 ```bash
+# Clone
 git clone https://github.com/<your-username>/AI-Analyst.git
 cd AI-Analyst
-```
 
-### 2. Set up the environment
-
-```bash
-# Create virtual environment and install dependencies
+# Environment (one command)
 bash scripts/setup.sh
 
 # Or manually:
@@ -59,13 +88,13 @@ source .venv/bin/activate    # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 3. Configure your API key
+### Configure
 
 ```bash
 cp .env.example .env
 ```
 
-Open `.env` and add your API key:
+Add your API key to `.env`:
 
 ```env
 # Pick one (or both — Claude takes priority if both are set):
@@ -73,55 +102,90 @@ ANTHROPIC_API_KEY=sk-ant-your-key-here
 OPENAI_API_KEY=sk-your-key-here
 ```
 
-### 4. Generate demo data (optional)
-
-The repo includes a pre-built NovaMart DuckDB file. If you want to regenerate it:
-
-```bash
-source .venv/bin/activate
-python scripts/generate_all.py              # 10% scale (default, fast)
-python scripts/generate_all.py --scale 1.0  # Full dataset (~1.4M sessions)
-python scripts/generate_all.py --scale 0.01 # Tiny dataset for quick testing
-```
-
-### 5. Start the server
+### Run
 
 ```bash
 source .venv/bin/activate
 uvicorn web.app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-Open **http://localhost:8000** in your browser.
+Open **http://localhost:8000**.
+
+The repo ships with a pre-built NovaMart DuckDB file. To regenerate or resize:
+
+```bash
+python scripts/generate_all.py              # 10% scale (default, fast)
+python scripts/generate_all.py --scale 1.0  # Full dataset (~1.4M sessions)
+python scripts/generate_all.py --scale 0.01 # Tiny dataset for quick testing
+```
 
 ---
 
-## How to Use
+## How It Works
 
-### Upload your own data
-1. Click the **+** button in the sidebar (or drag-and-drop a CSV)
-2. The file is auto-ingested into DuckDB, profiled, and ready to query
+### Architecture
 
-### Use the demo dataset
-1. Click any **NovaMart** table in the sidebar
-2. See auto-generated profile (row counts, column types, null rates, data quality)
-3. Try suggested queries or type your own
+Three layers, no framework overhead on the frontend.
 
-### Ask a question
-Type in the chat bar at the bottom. Examples:
+```
+Frontend (vanilla HTML/CSS/JS — zero build step)
+    ↕ REST API + SSE
+Backend (FastAPI)
+    ↕ DuckDB (local) / LLM APIs
+Data + AI
+```
 
-| Question | Complexity | What Happens |
-|---|---|---|
-| "How many users signed up in 2024?" | L1 (lookup) | Direct SQL → answer |
-| "Compare revenue by product category" | L2 (comparison) | SQL + chart |
-| "Why did conversion rates drop in Q4?" | L3 (analysis) | Multi-agent pipeline |
-| "Investigate root cause of the revenue decline and size the opportunity" | L4 (investigation) | Deep pipeline with 8 agents |
-| "Full pipeline: build a presentation on checkout funnel optimization" | L5 (presentation) | 15-agent pipeline → deck |
+### The Chat Pipeline
 
-### Pipeline progress
-For L3+ questions, the sidebar shows real-time agent progress:
-- **Framing Question** → **Generating Hypotheses** → **Exploring Data** → **Analyzing** → **Validating** → ...
-- Each finding appears as a card in the main workspace
-- Charts are generated and displayed inline
+The routing logic is the backbone. When a user types a question:
+
+1. `analysis_service.py` classifies the question into L1–L5 using pattern matching
+2. **L1–L2:** The question, schema context, and SQL/chart tools go to the LLM in a single call. Response is immediate.
+3. **L3–L5:** `pipeline_orchestrator.py` creates a run, selects agents based on complexity, and executes them sequentially. Each agent is a markdown prompt template from `agents/`, with variables like `{{BUSINESS_CONTEXT}}` and `{{DATA_INVENTORY}}` substituted at runtime. The LLM executes each agent with `execute_sql`, `generate_chart`, and `write_finding` tools. Progress events stream to the frontend via SSE.
+
+### Agent Plans by Complexity
+
+| Level | Plan | Agent Chain |
+|-------|------|-------------|
+| L3 | Guided Analysis | question-framing → data-explorer → descriptive-analytics → validation |
+| L4 | Deep Investigation | + hypothesis, root-cause-investigator, cross-verification, opportunity-sizer |
+| L5 | Full Presentation | + story-architect, chart-maker, storytelling, deck-creator, comms-drafter |
+
+There are 43 agent templates total, each encoding a specific analytical role. The pipeline selects and sequences them based on what the question requires.
+
+---
+
+## Using the Platform
+
+**Upload your own data** — click the **+** button in the sidebar or drag-and-drop a CSV. It's auto-ingested into DuckDB, profiled (column types, null rates, unique counts, data quality grading), and immediately queryable.
+
+**Use the demo dataset** — click any NovaMart table in the sidebar. Auto-generated profiles show row counts, column distributions, and data quality grades. Suggested queries are provided as starting points.
+
+**Ask a question** — type in the chat bar. For L3+ questions, the sidebar shows real-time agent progress: Framing → Hypotheses → Exploring → Analyzing → Validating. Each finding appears as a card in the main workspace with inline charts.
+
+---
+
+## NovaMart Demo Dataset
+
+The bundled dataset simulates a mid-size e-commerce company across 13 tables. It's designed for learning — realistic enough to practice on, messy enough to be interesting.
+
+| Table | Description | Rows (10%) |
+|-------|-------------|------------|
+| `users` | Customer profiles | ~15K |
+| `orders` | Purchase transactions | ~47K |
+| `products` | Product catalog | ~200 |
+| `promotions` | Discount campaigns | ~20 |
+| `categories` | Product categories | ~10 |
+| `sessions` | Website sessions | ~138K |
+| `events` | Granular user events | ~651K |
+| `order_items` | Line items per order | ~75K |
+| `memberships` | NovaMart Plus subscriptions | ~5.5K |
+| `experiments` | A/B test definitions | 2 |
+| `experiment_assignments` | User–experiment assignments | ~20K |
+| `nps_responses` | Net Promoter Score surveys | ~8K |
+| `channels` | Marketing channels | ~8 |
+
+Data covers Jan–Dec 2024 with realistic patterns: power-law user activity distributions, hourly traffic curves, seasonal trends, and intentional data quirks. One worth flagging — `sessions.had_purchase` is unreliable for Nov–Dec 2024. That's by design. Real data has problems, and an analyst who doesn't check for them isn't analyzing.
 
 ---
 
@@ -195,51 +259,10 @@ For L3+ questions, the sidebar shows real-time agent progress:
 
 ---
 
-## Architecture
-
-### Three-layer system
-
-```
-Frontend (vanilla HTML/CSS/JS)
-    ↕ REST API + SSE
-Backend (FastAPI)
-    ↕ DuckDB (local) / LLM APIs
-Data + AI
-```
-
-### How the chat works
-
-1. User types a question
-2. `analysis_service.py` classifies it (L1-L5) using regex patterns
-3. **L1-L2**: `llm_service.py` sends the question + schema context to the LLM with SQL/chart tools → immediate response
-4. **L3-L5**: `pipeline_orchestrator.py` creates a run, selects agents based on level, and executes them sequentially:
-   - Each agent is a markdown template loaded from `agents/`
-   - Variables (`{{BUSINESS_CONTEXT}}`, `{{DATA_INVENTORY}}`, etc.) are substituted
-   - The LLM executes the agent with `execute_sql`, `generate_chart`, and `write_finding` tools
-   - Progress events stream to the frontend via SSE
-
-### Pipeline plans by complexity
-
-| Level | Plan | Agents |
-|---|---|---|
-| L3 | Guided Analysis | question-framing → data-explorer → descriptive-analytics → validation |
-| L4 | Deep Investigation | + hypothesis, root-cause-investigator, cross-verification, opportunity-sizer |
-| L5 | Full Presentation | + story-architect, chart-maker, storytelling, deck-creator, comms-drafter |
-
-### Security
-
-- **SQL injection protection**: Only `SELECT` and `WITH` (CTE) queries are allowed. `DROP`, `ALTER`, `DELETE`, `INSERT`, `CREATE`, `TRUNCATE`, etc. are blocked by regex filter.
-- **DuckDB read-only mode**: Query connections are opened with `read_only=True`
-- **File upload validation**: Only `.csv` files accepted, with size limits
-- **Path traversal protection**: Chart filenames are validated (no `..` or `/`)
-- **No credentials in code**: All API keys loaded from `.env` via `python-dotenv`
-
----
-
 ## API Reference
 
 | Method | Endpoint | Description |
-|---|---|---|
+|--------|----------|-------------|
 | `POST` | `/api/datasets/upload` | Upload a CSV file |
 | `GET` | `/api/datasets` | List all datasets |
 | `GET` | `/api/datasets/{name}` | Get dataset info + sample rows |
@@ -248,7 +271,7 @@ Data + AI
 | `GET` | `/api/datasets/{source}/profile-all` | Profile all tables in a source |
 | `POST` | `/api/query` | Execute a raw SQL query |
 | `POST` | `/api/chat` | Send a natural language question |
-| `POST` | `/api/pipeline/start` | Start an L3-L5 analysis pipeline |
+| `POST` | `/api/pipeline/start` | Start an L3–L5 analysis pipeline |
 | `GET` | `/api/pipeline/{id}/events` | SSE stream of pipeline progress |
 | `GET` | `/api/pipeline/{id}/status` | Pipeline status snapshot |
 | `GET` | `/api/pipeline/{id}/results` | Pipeline findings + charts |
@@ -256,27 +279,17 @@ Data + AI
 
 ---
 
-## NovaMart Demo Dataset
+## Security
 
-The bundled demo dataset simulates a mid-size e-commerce company with 13 tables:
+Worth calling out explicitly — this runs arbitrary LLM-generated SQL against your data, so the guardrails matter.
 
-| Table | Description | Rows (10% scale) |
-|---|---|---|
-| `users` | Customer profiles | ~15K |
-| `orders` | Purchase transactions | ~47K |
-| `products` | Product catalog | ~200 |
-| `promotions` | Discount campaigns | ~20 |
-| `categories` | Product categories | ~10 |
-| `sessions` | Website sessions | ~138K |
-| `events` | Granular user events | ~651K |
-| `order_items` | Line items per order | ~75K |
-| `memberships` | NovaMart Plus subscriptions | ~5.5K |
-| `experiments` | A/B test definitions | 2 |
-| `experiment_assignments` | User-experiment assignments | ~20K |
-| `nps_responses` | Net Promoter Score surveys | ~8K |
-| `channels` | Marketing channels | ~8 |
-
-Data covers Jan-Dec 2024 with realistic patterns: power-law user activity, hourly traffic patterns, seasonal trends, and intentional data quirks for learning (e.g., `sessions.had_purchase` is unreliable for Nov-Dec 2024).
+| Layer | Protection |
+|-------|------------|
+| SQL filtering | Only `SELECT` and `WITH` (CTE) queries allowed. `DROP`, `ALTER`, `DELETE`, `INSERT`, `CREATE`, `TRUNCATE` are blocked by regex filter. |
+| Database access | Query connections opened with `read_only=True` |
+| File uploads | Only `.csv` accepted, with size limits enforced |
+| Path traversal | Chart filenames validated — no `..` or `/` allowed |
+| Credentials | All API keys loaded from `.env` via `python-dotenv` — nothing in code |
 
 ---
 
@@ -284,23 +297,23 @@ Data covers Jan-Dec 2024 with realistic patterns: power-law user activity, hourl
 
 ### LLM Provider
 
-The app auto-detects which LLM to use based on which API key is set in `.env`:
+The app auto-detects which LLM to use based on which API key is present in `.env`:
 
-| Key Set | Provider | Chat Model | Agent Model |
-|---|---|---|---|
-| `ANTHROPIC_API_KEY` | Anthropic | claude-sonnet-4 | claude-sonnet-4 |
-| `OPENAI_API_KEY` | OpenAI | gpt-4o | gpt-4o |
-| Both | Anthropic (priority) | claude-sonnet-4 | claude-sonnet-4 |
+| Key Set | Provider | Model |
+|---------|----------|-------|
+| `ANTHROPIC_API_KEY` | Anthropic | claude-sonnet-4 |
+| `OPENAI_API_KEY` | OpenAI | gpt-4o |
+| Both | Anthropic (priority) | claude-sonnet-4 |
 
 ### Snowflake (optional)
 
-For connecting to a live Snowflake warehouse instead of local DuckDB, add Snowflake credentials to `.env`. See `.env.example` for the required variables.
+For connecting to a live Snowflake warehouse instead of local DuckDB, add credentials to `.env`. See `.env.example` for required variables.
 
 ---
 
 ## Development
 
-### Running tests
+### Tests
 
 ```bash
 source .venv/bin/activate
@@ -319,49 +332,44 @@ python scripts/check_imports.py       # Verify helper imports
 
 ---
 
-## Dependencies
+## Tech Stack
 
-Core dependencies (see `requirements.txt` for full list):
-
-| Package | Purpose |
-|---|---|
-| `fastapi` | Web framework |
-| `uvicorn` | ASGI server |
-| `duckdb` | In-process SQL database |
+| Package | Role |
+|---------|------|
+| `fastapi` + `uvicorn` | Web framework + ASGI server |
+| `duckdb` | In-process analytical database |
 | `pandas` | Data manipulation |
-| `matplotlib` | Chart generation |
-| `seaborn` | Statistical visualization |
-| `numpy` / `scipy` | Numerical computation |
-| `pyyaml` | YAML configuration |
-| `python-dotenv` | Environment variable loading |
-| `anthropic` | Claude API client |
-| `openai` | GPT API client |
-| `python-docx` | Document generation |
+| `matplotlib` + `seaborn` | Chart generation |
+| `numpy` + `scipy` | Numerical computation |
+| `anthropic` / `openai` | LLM API clients |
+| `pyyaml` | Agent registry configuration |
+| `python-dotenv` | Environment variable management |
+| `python-docx` | Report generation |
 | `python-multipart` | File upload handling |
+
+Full list in `requirements.txt`.
 
 ---
 
 ## Troubleshooting
 
-### "No LLM API key configured"
-Add `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` to your `.env` file and restart the server.
+**"No LLM API key configured"** — Add `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` to `.env` and restart the server.
 
-### "Database not found"
-The demo DuckDB file should be at `data/practice/novamart_practice.duckdb`. If missing, regenerate it:
-```bash
-python scripts/generate_all.py
-```
+**"Database not found"** — The demo file belongs at `data/practice/novamart_practice.duckdb`. Regenerate with `python scripts/generate_all.py`.
 
-### Port already in use
-```bash
-uvicorn web.app:app --port 8001 --reload
-```
+**Port already in use** — `uvicorn web.app:app --port 8001 --reload`
 
-### Charts not rendering
-Ensure `matplotlib` is installed. On some systems you may need:
-```bash
-pip install matplotlib --force-reinstall
-```
+**Charts not rendering** — Reinstall matplotlib: `pip install matplotlib --force-reinstall`
+
+---
+
+## Why This Project Exists
+
+There's a gap between "AI that can query a database" and "AI that can analyze data." The first one is a text-to-SQL wrapper. The second requires the kind of structured thinking that most single-prompt LLM calls can't sustain — framing the right question, testing hypotheses against evidence, validating conclusions before presenting them.
+
+This project bridges that gap with a multi-agent architecture where each agent handles one step of the analytical process. The result isn't a chatbot that happens to know SQL. It's a system that follows the same workflow a human analyst would — just faster.
+
+The 43 agent templates are the headline. The question complexity router, the real-time pipeline, and the SWD-style output are what make it useful.
 
 ---
 
