@@ -19,6 +19,24 @@
 
 An AI-powered analysis platform that takes natural language questions and returns SQL, charts, and full analytical reports — not chat responses dressed up as insight.
 
+
+
+
+
+
+https://github.com/user-attachments/assets/0270eaeb-e66b-42ee-a44d-09b2e55d181a
+
+
+
+
+
+
+
+
+
+
+
+
 ---
 
 ## Background
