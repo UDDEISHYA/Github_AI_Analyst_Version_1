@@ -20,6 +20,10 @@
 An AI-powered analysis platform that takes natural language questions and returns SQL, charts, and full analytical reports — not chat responses dressed up as insight.
 
 
+> Note: This is the Version 1.  
+> Check the lastest version here: (https://github.com/UDDEISHYA/Siftory)
+
+
 
 
 
